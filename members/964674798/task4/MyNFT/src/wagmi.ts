@@ -1,13 +1,13 @@
 import { http, createConfig } from "wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
-import {
-  coinbaseWallet,
-  injected,
-  walletConnect,
-} from "wagmi/connectors";
+import { coinbaseWallet, injected, walletConnect } from "wagmi/connectors";
 
 export const config = createConfig({
-  chains: [mainnet, sepolia],
+  chains: [
+    mainnet,
+    sepolia,
+    { id: 1337, name: "Localhost 8545", rpcUrls: ["http://localhost:8545"] },
+  ],
   connectors: [
     injected(),
     coinbaseWallet({ appName: "WanFengWallet" }),

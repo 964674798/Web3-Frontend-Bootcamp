@@ -1,5 +1,5 @@
 import React from "react";
-import { useConnect, useAccount } from "wagmi";
+import { useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 
 // 链接钱包
