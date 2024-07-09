@@ -6,7 +6,7 @@ export const config = createConfig({
   chains: [
     mainnet,
     sepolia,
-    { id: 1337, name: "Localhost 8545", rpcUrls: ["http://localhost:8545"] },
+    { id: 31337, name: "Localhost 8545", rpcUrls: ["http://localhost:8545"] },
   ],
   connectors: [
     injected(),

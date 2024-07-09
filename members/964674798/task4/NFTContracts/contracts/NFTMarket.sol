@@ -20,6 +20,8 @@ contract NFTMarket is Ownable, IERC721Receiver {
     uint256 public totalListings;
 
     mapping(uint256 => Listing) public listings;
+    Listing[] public listingsData;
+    mapping(uint256 => uint) public idsMap;
 
     constructor(IERC20 _paymentToken, uint256 _listingFee) Ownable(msg.sender) {
         paymentToken = _paymentToken;
@@ -36,6 +38,12 @@ contract NFTMarket is Ownable, IERC721Receiver {
         uint256 price
     );
     event NFTBuy(uint256 listingId, address seller);
+    // event REMOVENFT(
+    //     uint256 listingId,
+    //     address nftContract,
+    //     address TokenId,
+    //     address seller
+    // );
 
     function ListingNft(
         address nftContract,
@@ -52,6 +60,8 @@ contract NFTMarket is Ownable, IERC721Receiver {
             tokenId,
             price
         );
+        idsMap[totalListings] = listingsData.length;
+        listingsData.push(listings[totalListings]);
 
         // sender to this sol
         IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
@@ -59,10 +69,15 @@ contract NFTMarket is Ownable, IERC721Receiver {
         emit NFTlisted(totalListings, msg.sender, nftContract, tokenId, price);
     }
 
+    // 返回所有上架的合约
+    function searchNFT() public view returns (Listing[]) {
+        return listingsData;
+    }
+
     function buyListingNft(uint256 listingId) external {
         Listing memory listing = listings[listingId];
         require(listing.price > 0, "listing is error!");
-   
+
         _safeTransferForm(
             paymentToken,
             msg.sender,
@@ -76,8 +91,7 @@ contract NFTMarket is Ownable, IERC721Receiver {
             listing.tokenId
         );
 
-        delete listings[listingId];
-
+        _removeNFT(listingId);
         emit NFTBuy(listingId, msg.sender);
     }
 
@@ -89,6 +103,23 @@ contract NFTMarket is Ownable, IERC721Receiver {
     ) private {
         bool sent = myToken.transferFrom(sender, recipient, price);
         require(sent, "Buy failed!");
+    }
+
+    // 删除合约
+    function _removeNFT(uint256 listingId) private {
+        uint index = idsMap[listingId];
+        Listing storage lastNft = listingsData[listingsData.length - 1];
+        listingsData[index] = lastNft;
+
+        listingsData.pop();
+        delete listings[listingId];
+        delete idsMap[listingId];
+        // emit REMOVENFT(
+        //     listingId,
+        //     needRemoveNft.nftContract,
+        //     needRemoveNft.TokenId,
+        //     needRemoveNft.seller
+        // );
     }
 
     // ensure receiver can revier ERC721
